@@ -1,6 +1,7 @@
 #include <uv.h>
 #include <uv_msg_framing.h>
 #include <mutex>
+#include <iostream>
 #include "write.h"
 
 namespace film { namespace network {
@@ -10,7 +11,7 @@ void write(Message message) {
 
   uv_buf_t* buf = new uv_buf_t();
   buf->len = message.length;
-  buf->base = new char[buf->len + 1];
+  buf->base = new char[buf->len];
   memcpy(buf->base, message.data, buf->len);
 
   struct BufMutex { uv_buf_t* buf; std::mutex* mutex; };

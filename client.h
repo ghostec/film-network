@@ -10,8 +10,9 @@ class Client : public Networkable<Client> {
 public:
   Client();
   ~Client();
-  virtual int start();
+  virtual void start(const char* ip, int port);
 private:
+  void _start(const char* ip, int port);
   static void connection_cb(uv_connect_t* connection, int status);
 };
 

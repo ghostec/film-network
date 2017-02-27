@@ -2,7 +2,6 @@
 #define NETWORK_NETWORKABLEH
 
 #include <uv.h>
-#include <functional>
 #include "observable.h"
 #include "message.h"
 
@@ -13,15 +12,35 @@ typedef std::function<void(Message)> Observer;
 template<typename Klass> 
 class Networkable : public Observable<Observer, Message> {
 public:
-  Networkable() {};
+  Networkable();
   ~Networkable() {};
-  virtual int start() = 0;
+  virtual void start(const char* ip, int port) = 0;
+  uv_loop_t* get_loop();
+  void set_loop(uv_loop_t* loop);
 protected: 
+  uv_loop_t* loop;
+
   void notify_observers(Message message);
   static void delete_buf_cb(uv_handle_t* handle, void* ptr);
   static void alloc_cb(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf);
   static void msg_read_cb(uv_stream_t *handle, void *msg, int size);
 };
+
+template<typename Klass>
+Networkable<Klass>::Networkable() {
+  loop = new uv_loop_t();
+  uv_loop_init(loop);
+}
+
+template<typename Klass>
+uv_loop_t* Networkable<Klass>::get_loop() {
+  return loop;
+}
+
+template<typename Klass>
+void Networkable<Klass>::set_loop(uv_loop_t* loop) {
+  this->loop = loop;
+}
 
 template<typename Klass>
 void Networkable<Klass>::notify_observers(Message message) {
@@ -51,14 +70,16 @@ void Networkable<Klass>::notify_observers(Message message) {
 
 template<typename Klass>
 void Networkable<Klass>::delete_buf_cb(uv_handle_t* handle, void* ptr) {
-   delete ptr;
+  delete (char*) ptr;
 }
 
 template<typename Klass>
 void Networkable<Klass>::msg_read_cb(uv_stream_t *handle, void *msg, int size) {
   if (size <= 0) return;
+  auto buf = new char[size];
+  memcpy(buf, (char*) msg, size * sizeof(char));
   ((Klass*)handle->data)->notify_observers({
-    .handle = handle, .data = (char*) msg, .length = (size_t) size
+    .handle = handle, .data = buf, .length = (size_t) size
   });
 }
 
