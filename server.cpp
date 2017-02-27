@@ -12,7 +12,7 @@ Server::Server() : Networkable<Server>() {}
 Server::~Server() {}
 
 void Server::start(const char* ip, int port) {
-  std::thread t(&Server::_start, this, ip, port).detach();
+  std::thread t(&Server::_start, this, ip, port);
   t.detach();
 }
 
