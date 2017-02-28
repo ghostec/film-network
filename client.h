@@ -1,5 +1,5 @@
-#ifndef NETWORK_CLIENTH
-#define NETWORK_CLIENTH
+#ifndef FILMNETWORK_CLIENTH
+#define FILMNETWORK_CLIENTH
 
 #include <uv.h>
 #include "networkable.h"

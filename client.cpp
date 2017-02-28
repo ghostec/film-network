@@ -38,6 +38,8 @@ void Client::connection_cb(uv_connect_t* connection, int status)
   uv_stream_t* stream = connection->handle;
   stream->data = connection->data;
   uv_msg_read_start((uv_msg_t*) stream, alloc_cb, msg_read_cb, delete_buf_cb);
+  auto inner_connection_cb = ((Client*) connection->data)->get_inner_connection_cb();
+  if(inner_connection_cb) inner_connection_cb(stream);
 }
 
 } }

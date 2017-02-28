@@ -48,11 +48,8 @@ void Server::connection_cb(uv_stream_t *server, int status) {
   if (uv_accept(server, (uv_stream_t*) client) == 0) {
     client->data = server->data;
     uv_msg_read_start((uv_msg_t*) client, alloc_cb, msg_read_cb, delete_buf_cb);
-    write({
-      .handle = (uv_stream_t*) client,
-      .data = CONNECTED_MESSAGE,
-      .length = strlen(CONNECTED_MESSAGE)
-    });
+    auto inner_connection_cb = ((Server*) server->data)->get_inner_connection_cb();
+    if(inner_connection_cb) inner_connection_cb((uv_stream_t*) client);
   }
   else {
     uv_close((uv_handle_t*) client, NULL);

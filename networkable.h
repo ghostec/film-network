@@ -1,5 +1,5 @@
-#ifndef NETWORK_NETWORKABLEH
-#define NETWORK_NETWORKABLEH
+#ifndef FILMNETWORK_NETWORKABLEH
+#define FILMNETWORK_NETWORKABLEH
 
 #include <uv.h>
 #include "observable.h"
@@ -17,8 +17,11 @@ public:
   virtual void start(const char* ip, int port) = 0;
   uv_loop_t* get_loop();
   void set_loop(uv_loop_t* loop);
+  std::function<void(uv_stream_t*)> get_inner_connection_cb();
+  void set_inner_connection_cb(std::function<void(uv_stream_t*)> inner_connection_cb);
 protected: 
   uv_loop_t* loop;
+  std::function<void(uv_stream_t*)> inner_connection_cb;
 
   void notify_observers(Message message);
   static void delete_buf_cb(uv_handle_t* handle, void* ptr);
@@ -40,6 +43,16 @@ uv_loop_t* Networkable<Klass>::get_loop() {
 template<typename Klass>
 void Networkable<Klass>::set_loop(uv_loop_t* loop) {
   this->loop = loop;
+}
+
+template<typename Klass>
+std::function<void(uv_stream_t*)> Networkable<Klass>::get_inner_connection_cb() {
+  return inner_connection_cb;
+}
+
+template<typename Klass>
+void Networkable<Klass>::set_inner_connection_cb(std::function<void(uv_stream_t*)> inner_connection_cb) {
+  this->inner_connection_cb =  inner_connection_cb;
 }
 
 template<typename Klass>
@@ -77,7 +90,7 @@ template<typename Klass>
 void Networkable<Klass>::msg_read_cb(uv_stream_t *handle, void *msg, int size) {
   if (size <= 0) return;
   auto buf = new char[size];
-  memcpy(buf, (char*) msg, size * sizeof(char));
+  memcpy(buf, msg, size);
   ((Klass*)handle->data)->notify_observers({
     .handle = handle, .data = buf, .length = (size_t) size
   });

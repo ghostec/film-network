@@ -1,5 +1,5 @@
-#ifndef NETWORK_WRITEH
-#define NETWORK_WRITEH
+#ifndef FILMNETWORK_WRITEH
+#define FILMNETWORK_WRITEH
 
 #include "message.h"
 

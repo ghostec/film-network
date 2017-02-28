@@ -14,23 +14,14 @@ void write(Message message) {
   buf->base = new char[buf->len];
   memcpy(buf->base, message.data, buf->len);
 
-  struct BufMutex { uv_buf_t* buf; std::mutex* mutex; };
-  uv_write_t req;
-  req.handle = message.handle;
-  req.data = (void*) new BufMutex({ .buf = buf, .mutex = &mutex });
-
   uv_msg_write_t* msg_req = new uv_msg_write_t();
-  msg_req->req = req;
+  msg_req->data = (void*) buf;
 
-  mutex.lock();
-  uv_msg_send(msg_req, msg_req->req.handle, buf->base, buf->len,
+  std::lock_guard<std::mutex> lock(mutex);
+  uv_msg_send(msg_req, message.handle, buf->base, buf->len,
     [](uv_write_t* req, int status) -> void {
-      if(req && req->data) {
-        auto helper = (BufMutex*) req->data;
-        helper->mutex->unlock();
-        delete helper->buf;
-        delete helper;
-      }
+      auto helper = (uv_buf_t*) req->data;
+      if(req->data) delete (uv_buf_t*) req->data;
       if(req) delete req;
   });
 }
