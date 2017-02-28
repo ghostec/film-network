@@ -1,6 +1,7 @@
 #include <uv.h>
 #include <uv_msg_framing.h>
 #include <mutex>
+#include <iostream>
 #include "write.h"
 
 namespace film { namespace network {
