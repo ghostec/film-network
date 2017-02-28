@@ -77,7 +77,7 @@ template<typename Klass>
 void Networkable<Klass>::msg_read_cb(uv_stream_t *handle, void *msg, int size) {
   if (size <= 0) return;
   auto buf = new char[size];
-  memcpy(buf, (char*) msg, size * sizeof(char));
+  memcpy(buf, msg, size);
   ((Klass*)handle->data)->notify_observers({
     .handle = handle, .data = buf, .length = (size_t) size
   });
