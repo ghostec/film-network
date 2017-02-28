@@ -1,4 +1,5 @@
 #include "uv_msg_framing.h"
+#include <stdio.h>
 
 #ifdef DEBUGTRACE
 #define UVTRACE(X)   printf X;
